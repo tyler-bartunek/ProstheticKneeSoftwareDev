@@ -1,5 +1,5 @@
 
-void test_pot_vals(int potPin){
+void TestPot(int potPin){
   
   int potVal = analogRead(potPin);
   
