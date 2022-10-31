@@ -1,9 +1,16 @@
-void TestRotaryEncoder(void){
-    //Tests the Rotary Encoder. Needs SPI stuff to be set up, then we should be able to pass that in to here hopefully.
+void TestRotaryEncoder(AS5X47 encoder){
+    //Might be able to get away with using a neat little library written for this general type of encoder
 
-    //Enable chip select
-    digitalWrite(encoder->pinSS(), LOW);
-    //SPI.transfer(data); //Read data from the SPI line. Currently fails to compile.
-    //Disable chip select
-    digitalWrite(encoder->pinSS(), HIGH);
+
+    //Calculate the time since the last reading
+    tslEncoderReading = millis() - encoderReadingTime;
+    
+    if (tslEncoderReading > encoderTestDelay){
+    float angle = encoder.readAngle(); //Get a reading
+    Serial.println(angle);             //Display reading
+
+    encoderReadingTime = millis(); //Reset the encoder time
+    }
+
+    
 }
