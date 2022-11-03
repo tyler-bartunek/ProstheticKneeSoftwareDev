@@ -8,7 +8,7 @@
 
 //#define and #include
 #include<Wire.h>
-//#include<SPI.h>                           //Might need this library later, gonna try the library made for similar encoders.
+#include<SPI.h>                           //Might need this library later, gonna try the library made for similar encoders.
 #include<Adafruit_Sensor.h>
 #include<Adafruit_BNO055.h>
 #include <AS5X47.h>                         //This library has not been tested for our encoder specifically, just similar ones. If it works then happy day!
@@ -18,38 +18,51 @@
 Adafruit_BNO055 bno = Adafruit_BNO055();  //Argument to this constructor can be the specific address. Trying to determine if the default address is occupied by something else or if wires/board are crap.
 
 //Pin variables
-const int linPotPin = 33;                 //Linear potentiometer
+const int linPotPin = 33;                  //Linear potentiometer
 const int encoder_ss_pin = 13;             //chip select for rotary encoder
 
 //Create rotary encoder object
-AS5X47 encoder(encoder_ss_pin);
+//AS5X47 encoder(encoder_ss_pin);
+SPISettings spi_setting(2000000, MSBFIRST, SPI_MODE1); //Rate pulled from Arduino Tutorial, SPI mode pulled from data sheet.
 
 //Variables for toggling userInput
 char userInput;
-bool newUserInput = true;                 //Flag for determining if something new was entered
+bool newUserInput = true;                  //Flag for determining if something new was entered
 
 //Encoder timing variables
-unsigned long encoderTestDelay = 1000;
+unsigned long encoderTestDelay = 100;
 unsigned long tslEncoderReading;
 unsigned long encoderReadingTime;
+
+//communication variables
+byte high_byte = 0;
+byte low_byte = 0;
+int reading = 0;
 
 
 void setup() {
   // put your setup code here, to run once:
 
   //Initialize Serial communication
-  Serial.begin(921600); // Rate in the IMU example sketch is 115200. Adafruit website recommends 921600 as it "works great", but that isn't a speed Arduino lists as supported. We'll see if it works.
+  Serial.begin(115200); 
 
+  pinMode(encoder_ss_pin,OUTPUT);
 
-  //Check if the IMU is on, and if it is then get initial readings
+  SPI.begin(SCK, MISO, MOSI, encoder_ss_pin);
+
+  digitalWrite(encoder_ss_pin, HIGH); //Haven't started communicating yet.
+
+  /*//Check if the IMU is on, and if it is then get initial readings
   if (!bno.begin())
   {
-    /* There was a problem detecting the BNO055 ... check your connections */
+   
     Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
     while (1);
   }
+  
 
   delay(1000);
+  */
 }
 
 void loop() {
@@ -57,8 +70,9 @@ void loop() {
 
 
   //Determine which test to run
-  if (Serial.available() > 2) { 
+  if (Serial.available() >= 2) { 
     userInput = Serial.read();
+    Serial.read();
     Serial.print("User entered: ");
     Serial.println(userInput);
     newUserInput = true;              //Set flag to true to capture the reality that we have new input
@@ -69,39 +83,39 @@ void loop() {
   switch (userInput) {
 
     case 'a':
-      if (newUserInput) {
-        newUserInput = !newUserInput; //Flip the flag to false 
+      if (newUserInput == 1) {
+         
         Serial.println("Testing IMU functionality, prints out orientation data in the form of a tab-deliminated quaternion.");
         Serial.println("w\t x\t y\t z"); //Explain the layout of the output
+        newUserInput = false; //Flip the flag to false 
       }
       TestIMU(bno);
       break;
 
     case 'b':
-      if (newUserInput) {
-        newUserInput = !newUserInput;
+      if (newUserInput == 1) {
         Serial.println("Testing the linear potentiometer readings from the analog pin.");
+        newUserInput = !newUserInput;
       }
       TestPot(linPotPin);
       break;
 
     case 'c':
-      if (newUserInput) {
+      if (newUserInput == 1) {
+        //Serial.println("Testing the rotary encoder. Expected output is angles");
         newUserInput != newUserInput;
-        Serial.println("Testing the rotary encoder. Expected output is angles");
       }
       TestMotor(); //This should cascade into a test for the rotary encoder.
       break;
 
     case 'd':
-      if (newUserInput) {
+      if (newUserInput == 1) {
+        Serial.println("Testing the motor");
         newUserInput != newUserInput;
-        Serial.println("Testing the rotary encoder. Expected output is angles");
       }
       TestMotor(); //This function currently does nothing.
-
-    default:
-      Serial.println("Invalid user input, or all cases failed");
+      break;
+    
     
   }
 

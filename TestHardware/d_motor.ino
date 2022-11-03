@@ -3,7 +3,7 @@ void TestMotor(void){
   switch (userInput){
 
     case 'c': //Test the encoder separately
-    TestRotaryEncoder(encoder);
+    TestRotaryEncoder();
     break;
 
     case 'd': //Test the motor being turned on full blast
