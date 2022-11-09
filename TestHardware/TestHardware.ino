@@ -13,31 +13,36 @@
 #include<Adafruit_BNO055.h>
 #include <AS5X47.h>                         //This library has not been tested for our encoder specifically, just similar ones. If it works then happy day!
 
+#define ENC_CS 10 //Chip select for rotary encoder
+#define ENC_ADDR 0x3FFF //Encoder register, might need to tinker with
+
+SPISettings EncSettings(10e6, MSBFIRST, SPI_MODE1);
+
 
 //Create IMU object
 Adafruit_BNO055 bno = Adafruit_BNO055();  //Argument to this constructor can be the specific address. Trying to determine if the default address is occupied by something else or if wires/board are crap.
 
 //Pin variables
-const int linPotPin = 33;                  //Linear potentiometer
-const int encoder_ss_pin = 13;             //chip select for rotary encoder
-
-//Create rotary encoder object
-//AS5X47 encoder(encoder_ss_pin);
-SPISettings spi_setting(2000000, MSBFIRST, SPI_MODE1); //Rate pulled from Arduino Tutorial, SPI mode pulled from data sheet.
+const int linPotPin = A2;                  //Linear potentiometer
+int const motorEnPin = 12;
+int const motorDirPin = 13;
+int const motordacPin = A0;
+int const dacResolution = 1023;  //resolution of dac/PWM
+float const motorOnV = 3.4;     //[V]
+float const maxArduinoV = 3.4;    //[V]
 
 //Variables for toggling userInput
 char userInput;
 bool newUserInput = true;                  //Flag for determining if something new was entered
 
 //Encoder timing variables
-unsigned long encoderTestDelay = 100;
+unsigned long encoderTestDelay = 1;
 unsigned long tslEncoderReading;
 unsigned long encoderReadingTime;
 
-//communication variables
-byte high_byte = 0;
-byte low_byte = 0;
-int reading = 0;
+unsigned int reading;
+
+int effort = 50; //start at no speed
 
 
 void setup() {
@@ -46,11 +51,12 @@ void setup() {
   //Initialize Serial communication
   Serial.begin(115200); 
 
-  pinMode(encoder_ss_pin,OUTPUT);
+  pinMode(ENC_CS,OUTPUT);
 
-  SPI.begin(SCK, MISO, MOSI, encoder_ss_pin);
+  SPI.begin();
 
-  digitalWrite(encoder_ss_pin, HIGH); //Haven't started communicating yet.
+  digitalWrite(ENC_CS, HIGH); //Haven't started communicating yet.
+  MotorOn(1,50);
 
   /*//Check if the IMU is on, and if it is then get initial readings
   if (!bno.begin())
@@ -68,7 +74,6 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
 
-
   //Determine which test to run
   if (Serial.available() >= 2) { 
     userInput = Serial.read();
@@ -85,8 +90,8 @@ void loop() {
     case 'a':
       if (newUserInput == 1) {
          
-        Serial.println("Testing IMU functionality, prints out orientation data in the form of a tab-deliminated quaternion.");
-        Serial.println("w\t x\t y\t z"); //Explain the layout of the output
+        //Serial.println("Testing IMU functionality, prints out orientation data in the form of a tab-deliminated quaternion.");
+        //Serial.println("w\t x\t y\t z"); //Explain the layout of the output
         newUserInput = false; //Flip the flag to false 
       }
       TestIMU(bno);
@@ -94,7 +99,7 @@ void loop() {
 
     case 'b':
       if (newUserInput == 1) {
-        Serial.println("Testing the linear potentiometer readings from the analog pin.");
+        //Serial.println("Testing the linear potentiometer readings from the analog pin.");
         newUserInput = !newUserInput;
       }
       TestPot(linPotPin);
@@ -110,11 +115,12 @@ void loop() {
 
     case 'd':
       if (newUserInput == 1) {
-        Serial.println("Testing the motor");
+        //Serial.println("Testing the motor");
         newUserInput != newUserInput;
       }
       TestMotor(); //This function currently does nothing.
       break;
+
     
     
   }

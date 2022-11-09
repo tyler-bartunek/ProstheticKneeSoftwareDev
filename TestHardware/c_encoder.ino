@@ -1,29 +1,26 @@
-void TestRotaryEncoder(void){
-    //Might be able to get away with using a neat little library written for this general type of encoder
+void TestRotaryEncoder(void) {
+  //Might be able to get away with using a neat little library written for this general type of encoder
 
 
-    //Calculate the time since the last reading
-    tslEncoderReading = millis() - encoderReadingTime;
-    
-    if (tslEncoderReading > encoderTestDelay){
+  //Calculate the time since the last reading
+  tslEncoderReading = millis() - encoderReadingTime;
 
-        SPI.beginTransaction(spi_setting);
-        digitalWrite(encoder_ss_pin,LOW); //Set to low to grab a reading
+  if (tslEncoderReading > encoderTestDelay) {
 
-        high_byte = SPI.transfer(0); //Since we are reading, sending doesn't matter
-        low_byte = SPI.transfer(0);
+    SPI.beginTransaction(EncSettings);
 
-        reading = high_byte << 8;
-        reading = reading | low_byte;
+    digitalWrite(ENC_CS, LOW);
+    reading = SPI.transfer16(ENC_ADDR);
+    digitalWrite(ENC_CS, HIGH);
 
-        digitalWrite(encoder_ss_pin,HIGH); //Done reading
+    reading = (reading & (ENC_ADDR));
 
-        Serial.println(reading);
+    float theta = ((float)reading) * 360.0 / 16989.0;
 
-        SPI.endTransaction();
+    Serial.println(theta);
 
     encoderReadingTime = millis(); //Reset the encoder time
-    }
+  }
 
-    
+
 }
