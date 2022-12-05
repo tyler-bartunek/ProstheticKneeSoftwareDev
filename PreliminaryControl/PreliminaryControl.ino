@@ -22,7 +22,8 @@ SPISettings EncSettings(10e6, MSBFIRST, SPI_MODE1);
 Adafruit_BNO055 bno = Adafruit_BNO055();  //Argument to this constructor can be the specific address.
 
 //Pin variables
-const int linPotPin = A1;                  //Linear potentiometer
+const int linPotPin1 = A1;                  //Linear potentiometer 1
+const int linPotPin2 = A2;                  //Linear potentiometer 2
 int const motorEnPin = 13;                 //Motor enable pin
 int const motorDirPin = 12;                //Motor direction pin
 int const motordacPin = A0;                //Dac pin for motor
@@ -54,6 +55,23 @@ unsigned int reading;
 
 //IMU variables->Euler angles
 float roll, pitch;
+
+// State Machine
+bool stanceState = 0;
+bool prevStanceState = 1;
+
+const double STANCERATIO = 1.5;
+
+long stanceDur = 0;
+long swingDur = 0;
+
+long swingStartTime = 0;
+long stanceStartTime = 0;
+
+// Trajectories
+double swingPosTraj[] = {0.186,0.188,0.178,0.178,0.18,0.158,0.137,0.097,0.077,0.07,0.067,0.061,0.073,1.327,6.858,14.472,24.658,34.394,43.502,50.942,
+      57.031,61.604,63.349,62.728,61.199,59.986,58.768,56.342,52.163,47.059,41.355,36.538,31.751,26.735,21.642,16.999,13.377,11.296,9.068,
+      7.059,4.914,3.016,1.895,1.402,0.918,0.212,0.237,0.25,0.247,0.25,0.251};
 
 void setup() {
   // put your setup code here, to run once:
@@ -121,7 +139,11 @@ void loop() {
   Serial.print("\t");
   Serial.print(motorDir);
   Serial.print("\t");
-  Serial.println(TestPot(linPotPin));
+  Serial.print(ReadPot(linPotPin1));
+  Serial.print("\t");
+  Serial.print(ReadPot(linPotPin2));
+  Serial.print("\t");
+  Serial.println(StanceDetect());
 
 
 }

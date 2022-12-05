@@ -1,15 +1,49 @@
+enum TrajType {
+  CONSTANT, WALKING, STAIRS
+  };
+
+TrajType trajType = WALKING;
+
 float TrajGenerate(void) {
 
   //Populate and modify with information necessary to generate trajectory
-  if (Serial.available() > 0) {
-    kp = 2;
-    ki = 4;
-    kd = 0;
-    Position = Serial.parseFloat();
-    Serial.read();
-
-  }
-
+  switch (trajType){
+    case CONSTANT:
+      if (Serial.available() > 0) {
+        kp = 2;
+        ki = 4;
+        kd = 0;
+        Position = Serial.parseFloat();
+        Serial.read();
+      }
+      break;
+  
+    case WALKING:
+      // Step State Machine
+      stanceState = StanceDetect();
+      long t = millis();
+    
+      if (stanceState){
+        // Write stance controller
+        if (!prevStanceState){
+          stanceStartTime = t;
+          }
+          
+        }
+      else {
+        // Write swing controller
+        if (prevStanceState){
+          swingStartTime = t;
+          stanceDur = t - stanceStartTime;
+          swingDur = stanceDur / STANCERATIO;
+          }
+          
+        Position = InterpolateTrajectory(swingPosTraj, (t - swingStartTime) / swingDur * (sizeof(swingPosTraj) / sizeof(double)));
+        
+        }
+      break;
+  
+    }
 
   return Position;
 }
