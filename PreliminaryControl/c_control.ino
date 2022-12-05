@@ -25,6 +25,7 @@ float TrajGenerate(void) {
     
       if (stanceState){
         // Write stance controller
+        Serial.println("INSIDE IF");
         if (!prevStanceState){
           stanceStartTime = t;
           }
@@ -32,19 +33,39 @@ float TrajGenerate(void) {
         }
       else {
         // Write swing controller
+        Serial.println("INSIDE ELSE");
         if (prevStanceState){
           swingStartTime = t;
           stanceDur = t - stanceStartTime;
           swingDur = stanceDur / STANCERATIO;
           }
-          
+        Serial.println("STUFF");
+        Serial.println(t - swingStartTime);
+        Serial.println((sizeof(swingPosTraj) / sizeof(double)));
         Position = InterpolateTrajectory(swingPosTraj, (t - swingStartTime) / swingDur * (sizeof(swingPosTraj) / sizeof(double)));
-        
+        prevStanceState = stanceState;
         }
       break;
   
     }
 
+  Position = constrain(Position, -10, 80);
+
+  Serial.print("Controller Info: ");
+  Serial.print("\t");
+  Serial.print(stanceState);
+  Serial.print("\t");
+  Serial.print(stanceStartTime);
+  Serial.print("\t");
+  Serial.print(stanceDur);
+  Serial.print("\t");
+  Serial.print(swingStartTime);
+  Serial.print("\t");
+  Serial.print(swingDur);
+  Serial.print("\t");
+  Serial.print(Position);
+  Serial.println("\t");
+  
   return Position;
 }
 

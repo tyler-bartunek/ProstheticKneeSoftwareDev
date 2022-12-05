@@ -1,4 +1,4 @@
-const int POT_THRESH = 1.5;
+const int POT_THRESH = 980;
 
 int ReadPot(int potPin){
 
@@ -10,6 +10,6 @@ int ReadPot(int potPin){
 
 bool StanceDetect(){
   
-  return ReadPot(linPotPin1) < POT_THRESH || ReadPot(linPotPin2) < POT_THRESH;
+  return ReadPot(linPotPin1) > POT_THRESH || ReadPot(linPotPin2) > POT_THRESH;
   
   }

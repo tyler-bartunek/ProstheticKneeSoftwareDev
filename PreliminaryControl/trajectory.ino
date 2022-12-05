@@ -1,4 +1,5 @@
 double InterpolateTrajectory(double traj[], double index){
+  Serial.println(index);
   int lowerIndex = floor(index);
   int upperIndex = ceil(index);
 

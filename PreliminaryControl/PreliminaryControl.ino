@@ -39,8 +39,8 @@ int motorDir = 1;
 float Position;
 
 // PID Gains
-float kp = 2;
-float ki = 4;
+float kp = 0;
+float ki = 0;
 float kd = 0;
 
 //PID error terms
