@@ -6,7 +6,7 @@
 
 //#define and #include
 #include<Wire.h>
-#include<SPI.h>                  
+#include<SPI.h>
 #include<Adafruit_Sensor.h>
 #include<Adafruit_BNO055.h>
 
@@ -19,11 +19,11 @@ SPISettings EncSettings(10e6, MSBFIRST, SPI_MODE1);
 
 
 //Create IMU object
-Adafruit_BNO055 bno = Adafruit_BNO055();  //Argument to this constructor can be the specific address. 
+Adafruit_BNO055 bno = Adafruit_BNO055();  //Argument to this constructor can be the specific address.
 
 //Pin variables
 const int linPotPin = A1;                  //Linear potentiometer
-int const motorEnPin = 13;                 //Motor enable pin       
+int const motorEnPin = 13;                 //Motor enable pin
 int const motorDirPin = 12;                //Motor direction pin
 int const motordacPin = A0;                //Dac pin for motor
 int const dacResolution = 1023;            //resolution of dac/PWM
@@ -36,6 +36,11 @@ int motorDir = 1;
 
 //Trajectory variable
 float Position;
+
+// PID Gains
+float kp = 2;
+float ki = 4;
+float kd = 0;
 
 //PID error terms
 float error, iError, dError; //errors for P,I, and D terms.
@@ -69,11 +74,11 @@ void setup() {
   //Send the chip select pin high by default
   digitalWrite(ENC_CS, HIGH); //Haven't started communicating yet.
 
-//  MotorOff();
-//
+  //  MotorOff();
+  //
   delay(1000);
 
-  
+
   //Check if the IMU is on. If not throw an error
   if (!bno.begin())
   {
@@ -87,23 +92,23 @@ void setup() {
 void loop() {
 
   //Get trajectory setpoint
-  
+
   Position = TrajGenerate();
 
   //Get PWM command signal to achieve setpoint
   int dutyCycle = PID(Position);
   //int dir = bitRead(dutyCycle,31); //Keep for personal reference. This should get the MSB, 1 for negative and 0 for positive
-  if (dutyCycle > 0){
+  if (dutyCycle > 0) {
     motorDir  = 1;
   }
-  else{
+  else {
     motorDir = 0;
   }
   dutyCycle = abs(dutyCycle);
 
-dutyCycle = constrain(dutyCycle, 0, 50); // Constrain for testing
+  dutyCycle = constrain(dutyCycle, 0, 50); // Constrain for testing
 
- MotorOn(motorDir, dutyCycle);
+  MotorOn(motorDir, dutyCycle);
 
   //Position \t Encoder reading \t dutyCycle \t error
   Serial.print(Position);
@@ -118,5 +123,5 @@ dutyCycle = constrain(dutyCycle, 0, 50); // Constrain for testing
   Serial.print("\t");
   Serial.println(TestPot(linPotPin));
 
-  
+
 }
