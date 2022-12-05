@@ -23,8 +23,8 @@ Adafruit_BNO055 bno = Adafruit_BNO055();  //Argument to this constructor can be 
 
 //Pin variables
 const int linPotPin = A1;                  //Linear potentiometer
-int const motorEnPin = 12;                 //Motor enable pin       
-int const motorDirPin = 13;                //Motor direction pin
+int const motorEnPin = 13;                 //Motor enable pin       
+int const motorDirPin = 12;                //Motor direction pin
 int const motordacPin = A0;                //Dac pin for motor
 int const dacResolution = 1023;            //resolution of dac/PWM
 float const motorOnV = 3.4;                //[V]
@@ -59,11 +59,19 @@ void setup() {
   //Set up chip select as output
   pinMode(ENC_CS, OUTPUT);
 
+  //Set up motor enable as output
+  pinMode(motorEnPin, OUTPUT);
+  pinMode(motorDirPin, OUTPUT);
+
   //Begin SPI comms
   SPI.begin();
 
   //Send the chip select pin high by default
   digitalWrite(ENC_CS, HIGH); //Haven't started communicating yet.
+
+//  MotorOff();
+//
+  delay(1000);
 
   
   //Check if the IMU is on. If not throw an error
@@ -79,6 +87,7 @@ void setup() {
 void loop() {
 
   //Get trajectory setpoint
+  
   Position = TrajGenerate();
 
   //Get PWM command signal to achieve setpoint
@@ -92,6 +101,22 @@ void loop() {
   }
   dutyCycle = abs(dutyCycle);
 
-  MotorOn(motorDir, dutyCycle);
+dutyCycle = constrain(dutyCycle, 0, 50); // Constrain for testing
 
+ MotorOn(motorDir, dutyCycle);
+
+  //Position \t Encoder reading \t dutyCycle \t error
+  Serial.print(Position);
+  Serial.print("\t");
+  Serial.print(ReadEncoder());
+  Serial.print("\t");
+  Serial.print(dutyCycle);
+  Serial.print("\t");
+  Serial.print(error);
+  Serial.print("\t");
+  Serial.print(motorDir);
+  Serial.print("\t");
+  Serial.println(TestPot(linPotPin));
+
+  
 }

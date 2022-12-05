@@ -16,6 +16,6 @@ float ReadEncoder(void) {
     reading = (reading & (ENC_ADDR));
 
     //Map to degrees, 16989 is the resolution of the encoder.
-    return ((float)reading) * 360.0 / 16989.0;
+    return 189. -((float)reading) * 360.0 / 16989.0;
 
 }
