@@ -14,6 +14,9 @@ float TrajGenerate(void){
 
 int PID(float ref){
 
+
+
+  //looke some code I added
   //PID gains
   float kp = 2;
   float ki = 4;
