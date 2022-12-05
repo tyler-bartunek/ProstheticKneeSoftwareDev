@@ -1,7 +1,11 @@
 float TrajGenerate(void){
 
   //Populate and modify with information necessary to generate trajectory
-  Position = 180;
+  if (Serial.available() > 0){
+    Position = Serial.parseFloat();
+    Serial.read();
+    
+  }
 
 
   return Position;
@@ -11,9 +15,9 @@ float TrajGenerate(void){
 int PID(float ref){
 
   //PID gains
-  float kp;
-  float ki;
-  float kd;
+  float kp = 2;
+  float ki = 4;
+  float kd = 0;
   
   //terms to be used with derivative control (maybe useless, will determine later)
   float errorOld = error;
@@ -25,7 +29,7 @@ int PID(float ref){
 
   //Update error terms
   error = ref - ReadEncoder();
-  iError += error;
+  iError += error*dt;
   iError = constrain(iError, -maxIntegral, maxIntegral);
   dError = dError * alpha + (error - errorOld) / dt * (1 - alpha);
 
@@ -37,5 +41,5 @@ int PID(float ref){
   //Assert only valid PWM commands
   dutyCycle = constrain(dutyCycle,-100,100); //May need to modify motor functions or this line to make work as intended.
 
-  return dutyCycle;
+  return dutyCycle; //this is negative because it needs to be
 }
