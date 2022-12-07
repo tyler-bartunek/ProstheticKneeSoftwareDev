@@ -6,7 +6,7 @@
 
 //#define and #include
 #include<Wire.h>
-#include<SPI.h>                  
+#include<SPI.h>
 #include<Adafruit_Sensor.h>
 #include<Adafruit_BNO055.h>
 
@@ -19,11 +19,12 @@ SPISettings EncSettings(10e6, MSBFIRST, SPI_MODE1);
 
 
 //Create IMU object
-Adafruit_BNO055 bno = Adafruit_BNO055();  //Argument to this constructor can be the specific address. 
+Adafruit_BNO055 bno = Adafruit_BNO055();  //Argument to this constructor can be the specific address.
 
 //Pin variables
-const int linPotPin = A1;                  //Linear potentiometer
-int const motorEnPin = 13;                 //Motor enable pin       
+const int linPotPin1 = A1;                  //Linear potentiometer 1
+const int linPotPin2 = A2;                  //Linear potentiometer 2
+int const motorEnPin = 13;                 //Motor enable pin
 int const motorDirPin = 12;                //Motor direction pin
 int const motordacPin = A0;                //Dac pin for motor
 int const dacResolution = 1023;            //resolution of dac/PWM
@@ -37,6 +38,11 @@ int motorDir = 1;
 //Trajectory variable
 float Position;
 
+// PID Gains
+float kp = 0;
+float ki = 0;
+float kd = 0;
+
 //PID error terms
 float error, iError, dError; //errors for P,I, and D terms.
 float alpha = 0.85; //To be set at some point, if we want a weighted average filter on the derivative term (or if we even need a derivative term)
@@ -49,6 +55,23 @@ unsigned int reading;
 
 //IMU variables->Euler angles
 float roll, pitch;
+
+// State Machine
+bool stanceState = 0;
+bool prevStanceState = 1;
+
+const double STANCERATIO = 1.5;
+
+long stanceDur = 0;
+long swingDur = 0;
+
+long swingStartTime = 0;
+long stanceStartTime = 0;
+
+// Trajectories
+double swingPosTraj[] = {0.186,0.188,0.178,0.178,0.18,0.158,0.137,0.097,0.077,0.07,0.067,0.061,0.073,1.327,6.858,14.472,24.658,34.394,43.502,50.942,
+      57.031,61.604,63.349,62.728,61.199,59.986,58.768,56.342,52.163,47.059,41.355,36.538,31.751,26.735,21.642,16.999,13.377,11.296,9.068,
+      7.059,4.914,3.016,1.895,1.402,0.918,0.212,0.237,0.25,0.247,0.25,0.251};
 
 void setup() {
   // put your setup code here, to run once:
@@ -69,11 +92,11 @@ void setup() {
   //Send the chip select pin high by default
   digitalWrite(ENC_CS, HIGH); //Haven't started communicating yet.
 
-//  MotorOff();
-//
+  //  MotorOff();
+  //
   delay(1000);
 
-  
+
   //Check if the IMU is on. If not throw an error
   if (!bno.begin())
   {
@@ -87,36 +110,40 @@ void setup() {
 void loop() {
 
   //Get trajectory setpoint
-  
+
   Position = TrajGenerate();
 
   //Get PWM command signal to achieve setpoint
   int dutyCycle = PID(Position);
   //int dir = bitRead(dutyCycle,31); //Keep for personal reference. This should get the MSB, 1 for negative and 0 for positive
-  if (dutyCycle > 0){
+  if (dutyCycle > 0) {
     motorDir  = 1;
   }
-  else{
+  else {
     motorDir = 0;
   }
   dutyCycle = abs(dutyCycle);
 
-dutyCycle = constrain(dutyCycle, 0, 50); // Constrain for testing
+  dutyCycle = constrain(dutyCycle, 0, 50); // Constrain for testing
 
- MotorOn(motorDir, dutyCycle);
+  MotorOn(motorDir, dutyCycle);
 
   //Position \t Encoder reading \t dutyCycle \t error
-  Serial.print(Position);
-  Serial.print("\t");
+  // Serial.print(Position);
+  // Serial.print("\t");
   Serial.print(ReadEncoder());
   Serial.print("\t");
-  Serial.print(dutyCycle);
-  Serial.print("\t");
-  Serial.print(error);
-  Serial.print("\t");
-  Serial.print(motorDir);
-  Serial.print("\t");
-  Serial.println(TestPot(linPotPin));
+  // Serial.print(dutyCycle);
+  // Serial.print("\t");
+  // Serial.print(error);
+  // Serial.print("\t");
+  // Serial.print(motorDir);
+  // Serial.print("\t");
+   Serial.print("Linpot1:");Serial.print(ReadPot(linPotPin1));
+   Serial.print("\t");
+  Serial.print("Linpot2:"); Serial.println(ReadPot(linPotPin2));
+  // Serial.print("\t");
+  // Serial.println(StanceDetect());
 
-  
+
 }

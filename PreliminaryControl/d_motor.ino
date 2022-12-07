@@ -17,7 +17,7 @@ void TestMotor(void) {
 void MotorOn(int dir, float effort) {
   effort = constrain(effort, 0, 100) / 100;  //conttrain effort in case of out of bounds input
   int dac = (1 - effort) * dacResolution * motorOnV / maxArduinoV;
-  Serial.println(dir);
+  //Serial.println(dir);
   digitalWrite(motorDirPin, dir);  //set motor direction to arg(motorDir)
   analogWrite(motordacPin, dac);   // set motor power to arg(motorPwr)
   digitalWrite(motorEnPin, 1); // set motor enable to on
