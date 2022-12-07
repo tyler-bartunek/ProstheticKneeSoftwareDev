@@ -129,21 +129,21 @@ void loop() {
   MotorOn(motorDir, dutyCycle);
 
   //Position \t Encoder reading \t dutyCycle \t error
-  Serial.print(Position);
-  Serial.print("\t");
+  // Serial.print(Position);
+  // Serial.print("\t");
   Serial.print(ReadEncoder());
   Serial.print("\t");
-  Serial.print(dutyCycle);
-  Serial.print("\t");
-  Serial.print(error);
-  Serial.print("\t");
-  Serial.print(motorDir);
-  Serial.print("\t");
-  Serial.print(ReadPot(linPotPin1));
-  Serial.print("\t");
-  Serial.print(ReadPot(linPotPin2));
-  Serial.print("\t");
-  Serial.println(StanceDetect());
+  // Serial.print(dutyCycle);
+  // Serial.print("\t");
+  // Serial.print(error);
+  // Serial.print("\t");
+  // Serial.print(motorDir);
+  // Serial.print("\t");
+   Serial.print("Linpot1:");Serial.print(ReadPot(linPotPin1));
+   Serial.print("\t");
+  Serial.print("Linpot2:"); Serial.println(ReadPot(linPotPin2));
+  // Serial.print("\t");
+  // Serial.println(StanceDetect());
 
 
 }

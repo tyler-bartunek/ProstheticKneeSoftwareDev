@@ -1,13 +1,15 @@
 enum TrajType {
-  CONSTANT, WALKING, STAIRS
-  };
+  CONSTANT,
+  WALKING,
+  STAIRS
+};
 
 TrajType trajType = WALKING;
 
 float TrajGenerate(void) {
 
   //Populate and modify with information necessary to generate trajectory
-  switch (trajType){
+  switch (trajType) {
     case CONSTANT:
       if (Serial.available() > 0) {
         kp = 2;
@@ -17,55 +19,67 @@ float TrajGenerate(void) {
         Serial.read();
       }
       break;
-  
+
     case WALKING:
       // Step State Machine
       stanceState = StanceDetect();
       long t = millis();
-    
-      if (stanceState){
+      kp = 2;
+      ki = 4;
+      kd = 0;
+      if (stanceState) {  // IN STANCE
         // Write stance controller
-        Serial.println("INSIDE IF");
-        if (!prevStanceState){
+        if (!prevStanceState) {
+          //Serial.println("INSIDE IF");
+
           stanceStartTime = t;
-          }
-          
         }
-      else {
+
+      } else {  // IN SWING
         // Write swing controller
-        Serial.println("INSIDE ELSE");
-        if (prevStanceState){
+        if (prevStanceState) {
+          // Serial.println("INSIDE ELSE");
+
           swingStartTime = t;
           stanceDur = t - stanceStartTime;
-          swingDur = stanceDur / STANCERATIO;
-          }
-        Serial.println("STUFF");
-        Serial.println(t - swingStartTime);
-        Serial.println((sizeof(swingPosTraj) / sizeof(double)));
-        Position = InterpolateTrajectory(swingPosTraj, (t - swingStartTime) / swingDur * (sizeof(swingPosTraj) / sizeof(double)));
-        prevStanceState = stanceState;
+          //swingDur = stanceDur / STANCERATIO;
+          swingDur = 2000;  // [ms] FOR TESTING, REMOVE WHEN USING IMU
         }
-      break;
-  
-    }
+        Serial.println("STUFF");
+        Serial.print("Time:");
+        Serial.println(t);
+        Serial.print("swingStartTime:");
+        Serial.println(swingStartTime);
+        Serial.print("Percent swing:");
+        Serial.println((t - swingStartTime) / swingDur);
+        //Serial.println(swingDur);
+        double k = (float)(t - swingStartTime) / swingDur * (sizeof(swingPosTraj) / sizeof(double));
+        Serial.print("Index:");
+        Serial.println(k);
+        Position = InterpolateTrajectory(swingPosTraj, k);
+      }
+      prevStanceState = stanceState;
 
-  Position = constrain(Position, -10, 80);
+      break;
+  }
+
+  Position = constrain(Position, 0, 65);
 
   Serial.print("Controller Info: ");
-  Serial.print("\t");
-  Serial.print(stanceState);
-  Serial.print("\t");
-  Serial.print(stanceStartTime);
-  Serial.print("\t");
-  Serial.print(stanceDur);
-  Serial.print("\t");
-  Serial.print(swingStartTime);
-  Serial.print("\t");
-  Serial.print(swingDur);
-  Serial.print("\t");
+  // Serial.print("\t");
+  // Serial.print(stanceState);
+  // Serial.print("\t");
+  // Serial.print(stanceStartTime);
+  // Serial.print("\t");
+  // Serial.print(stanceDur);
+  // Serial.print("\t");
+  // Serial.print(swingStartTime);
+  // Serial.print("\t");
+  // Serial.print(swingDur);
+  // Serial.print("\t");
   Serial.print(Position);
   Serial.println("\t");
-  
+
   return Position;
 }
 
@@ -92,7 +106,7 @@ int PID(float ref) {
   int dutyCycle = (int)(kp * error + ki * iError + kd * dError);
 
   //Assert only valid PWM commands
-  dutyCycle = constrain(dutyCycle, -100, 100); //May need to modify motor functions or this line to make work as intended.
+  dutyCycle = constrain(dutyCycle, -100, 100);  //May need to modify motor functions or this line to make work as intended.
 
-  return dutyCycle; //this is negative because it needs to be
+  return dutyCycle;  //this is negative because it needs to be
 }
