@@ -94,7 +94,7 @@ float roll, pitch;
 
 // State Machine
 bool stanceState = 0;
-bool prevStanceState = 1;
+bool prevStanceState = 0;
 
 /**Walking Terms**/
 const double STANCERATIO = 1.5;
@@ -161,27 +161,26 @@ void loop() {
   }
   dutyCycle = abs(dutyCycle);
 
-  dutyCycle = constrain(dutyCycle, 0, 50); // Constrain for testing
-
   MotorOn(motorDir, dutyCycle);
 
   //Display results for tuning/debugging purposes
 
   
   //Position \t Encoder reading \t dutyCycle \t error
-  // Serial.print(Position);
+// Serial.println("Controller Info:");  
+// Serial.print("Des Pos: ");Serial.println(Position);  // Serial.print("\t");
   // Serial.print("\t");
-  Serial.print(ReadEncoder());
-  Serial.print("\t");
+  // Serial.print("Measured Pos: ");Serial.println(ReadEncoder());
+  //Serial.print("\t");
   // Serial.print(dutyCycle);
   // Serial.print("\t");
   // Serial.print(error);
   // Serial.print("\t");
   // Serial.print(motorDir);
   // Serial.print("\t");
-   Serial.print("Linpot1:");Serial.print(ReadPot(linPotPin1));
-   Serial.print("\t");
-  Serial.print("Linpot2:"); Serial.println(ReadPot(linPotPin2));
+  //  Serial.print("Linpot1:");Serial.print(ReadPot(linPotPin1));
+  //  Serial.print("\t");
+  // Serial.print("Linpot2:"); Serial.println(ReadPot(linPotPin2));
   // Serial.print("\t");
   // Serial.println(StanceDetect());
 
