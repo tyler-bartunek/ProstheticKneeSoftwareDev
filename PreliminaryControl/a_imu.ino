@@ -3,7 +3,7 @@
  * 
  * Inputs: bno object, references to orientation data
  */
- void TestIMU(Adafruit_BNO055 bno, float &roll, float &pitch){
+ void ReadIMU(Adafruit_BNO055 bno, float &roll, float &pitch){
   
   //Set up sensors event variable for recording sensor data
   sensors_event_t event;
