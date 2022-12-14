@@ -1,3 +1,5 @@
+
+//Possible states for the state machine
 enum TrajType {
   CONSTANT,
   WALKING,
@@ -8,8 +10,14 @@ TrajType trajType = WALKING;
 
 float TrajGenerate(void) {
 
-  //Populate and modify with information necessary to generate trajectory
+  /*
+    TrajGenerate: Implements the PID controller for swing with the setpoints determined from the trajectory interpolation function.
+
+    Inputs: bno object, references to orientation angles designated as roll and pitch.
+  */
+
   switch (trajType) {
+    //CONSTANT case: check step input position commands
     case CONSTANT:
       if (Serial.available() > 0) {
         kp = 2;
@@ -28,7 +36,7 @@ float TrajGenerate(void) {
       ki = 16;
       kd = 0;
       if (stanceState) {           // IN STANCE
-      Position = 0;
+        Position = 0;
         Serial.println("STANCE");  // Write stance controller
         if (!prevStanceState) {
           //Serial.println("INSIDE IF");

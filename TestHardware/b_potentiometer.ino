@@ -1,7 +1,7 @@
 
-void TestPot(int potPin){
+int TestPot(int potPin){
   
-  int potVal = analogRead(potPin);
+  return analogRead(potPin);
   
-  Serial.println(potVal);
+  
 }

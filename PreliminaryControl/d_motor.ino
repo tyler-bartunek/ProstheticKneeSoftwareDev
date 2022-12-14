@@ -1,11 +1,11 @@
 void TestMotor(void) {
 
   //Turn on the motor
-      //if (Serial.available() > 0) {
-    //effort = Serial.parseInt();
-    //Serial.read();
-    //Serial.print("User entered ");
-    //Serial.println(effort);
+  //if (Serial.available() > 0) {
+  //effort = Serial.parseInt();
+  //Serial.read();
+  //Serial.print("User entered ");
+  //Serial.println(effort);
   //}
   MotorOn(motorDir, 50);
 
@@ -15,7 +15,7 @@ void TestMotor(void) {
 
 
 void MotorOn(int dir, float effort) {
-  effort = constrain(effort, 0, 75) / 100;  //conttrain effort in case of out of bounds input
+  effort = constrain(effort, 0, 75) / 100;  //constrain effort in case of out of bounds input
   Serial.println(effort);
   int dac = (1 - effort) * dacResolution * motorOnV / maxArduinoV;
   //Serial.println(dir);

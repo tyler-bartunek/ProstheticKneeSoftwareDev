@@ -1,25 +1,9 @@
 void TestMotor(void) {
-
-  switch (userInput) {
-
-    case 'c': //Test the encoder separately
-      TestRotaryEncoder();
-      break;
-
-    case 'd': //Test the motor being turned on full blast
-      //Does nothing
-      int motorDir = 1;
-      if (Serial.available() > 0) {
-        effort = Serial.parseInt();
+        effort = 50;
         Serial.read();
-        Serial.print("User entered ");
-        Serial.println(effort);
-      }
-      MotorOn(motorDir, effort);
-      TestRotaryEncoder();
 
-      break;
-  }
+      MotorOn(1, effort);
+
 
 }
 
