@@ -1,7 +1,16 @@
 double InterpolateTrajectory(double traj[], double index, int lenTraj) {
+
+  /*
+     InterpolateTrajectory: Finds the correct index to use as the set point for the controller
+
+     INPUTS: 1. traj[]- Existing global trajectory array.
+             2. index- The index estimate from the trajectory planner
+             3. lenTraj- The length of the trajectory array
+
+  */
   // Serial.print("Index (before):");
   // Serial.println(index);
-  index = constrain(index, 0, lenTraj-1);
+  index = constrain(index, 0, lenTraj - 1);
 
   int lowerIndex = floor(index);
   int upperIndex = ceil(index);
